@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), './../
 from src.verses.scanner import VerseScanner
 from src.verses.parser import VerseParser
 from src.verses.generator import VerseGenerator
-from src.verses.nodes import Verse
+from src.verses.nodes import NodeVerse
 from src.verses.errors import ParseError
 from src.words.splitter import WordSplitter
 from src.stress.finder import StressFinder
@@ -44,7 +44,7 @@ def main():
     finder    = StressFinder()
     generator = VerseGenerator(splitter, finder)
 
-    verse: Verse
+    verse: NodeVerse
     try:
         verse = parser.parse()
     except ParseError as error:

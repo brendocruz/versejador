@@ -1,23 +1,21 @@
-<verse>					::= <phrase> | <phrase> <verse>
-<phrase>				::= <full-built-word> 
-							[<word-operator> <full-built-word>]
-<full-built-word>		::= <auto-built-word> 
-						  | <manual-built-word> 
-						  | <stress-altered-word>
-						  | <fragment-made-word>
-<fragment-made-word>	::= '|' <fragment-string> ['|' <fragment-string>] + '|'
-<auto-built-word>		::= <string> [<vowel-operator> <string>]
-<manual-built-word>		::= '[' <string> ['|' <string> ] + ']'
-<stress-altered-word>	::= <stress-operator> <string>
-<word-operator>			::= '/' | '*'
-<vowel-operator>		::= '~' | '^'
-<stress-operator>		::= '>' | '<'
-
-<fragment-string>		::= <string-union> | '+' <string-union>
-<string-union>			::= <string> '_' <string> ['_' <string>] +
-<string>				::= <letter> | <letter> <string>
-<letter>				::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h'
-						  | 'j' | 'i' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p'
-						  | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x'
-						  | 'y' | 'z' | 'ç' | 'à' | 'á' | 'ã' | 'â' | 'é'
-						  | 'ê' | 'í' | 'ó' | 'õ' | 'ô' | 'ú'
+<verse>           ::= <phrase> | <phrase> <verse>
+<phrase>          ::= <full-word> [<word-operator> <full-word>]
+<full-word>       ::= <auto-word> 
+                    | <manual-word> 
+                    | <stressed-word>
+                    | <fragments>
+<fragments>       ::= '|' <fragment> ['|' <fragment>] + '|'
+<auto-word>       ::= <word> [<vowel-operator> <word>]
+<manual-word>     ::= '[' <word> ['|' <word> ] + ']'
+<stressed-word>   ::= <stress-operator> <word>
+<word-operator>   ::= '/' | '*'
+<vowel-operator>  ::= '~' | '^'
+<stress-operator> ::= '>' | '<'
+<fragment>        ::= <word-union> | '+' <word-union>
+<word-union>      ::= <word> '_' <word> ['_' <word>] +
+<word>            ::= <letter> | <letter> <word>
+<letter>          ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h'
+                    | 'j' | 'i' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p'
+                    | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x'
+                    | 'y' | 'z' | 'ç' | 'à' | 'á' | 'ã' | 'â' | 'é'
+                    | 'ê' | 'í' | 'ó' | 'õ' | 'ô' | 'ú'

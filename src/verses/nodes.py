@@ -1,103 +1,101 @@
 from dataclasses import dataclass, field
 
-
+### LIST OF NODES
+# - NodePhrase
+# - NodeVerse
+# > WORDS
+#  - NodeWord
+#  - NodeManualWord
+#  - NodeTiedWords
+#  - NodeUntiedWords
+#  - NodeTiedSubwords
+#  - NodeUntiedSubwords
+#  - NodeStressedWord
+#  - NodeUnstressedWord
+# > FRAGMENTS
+#  - NodeFragment
+#  - NodeFragments
+#  - NodeStressedFragment
+#  - NodeJoinedFragments
+#  - NodeUncountedFragment
 
 @dataclass
-class Phrase:
-    children: tuple['Phrase', ...] = field(default_factory=tuple)
+class NodePhrase:
+    children: tuple['NodePhrase', ...] = field(default_factory=tuple)
 
-    def __init__(self, *args: 'Phrase') -> None:
+    def __init__(self, *args: 'NodePhrase') -> None:
         self.children = args
 
 
-
 @dataclass(init=False)
-class Verse(Phrase):
+class NodeVerse(NodePhrase):
     pass
 
 
-
 @dataclass
-class String(Phrase):
+class NodeWord(NodePhrase):
     value: str = field(default_factory=str)
 
-    def __init__(self, value: str, *args: Phrase) -> None:
+    def __init__(self, value: str, *args: NodePhrase) -> None:
         self.value = value
         super().__init__(*args)
 
 
-@dataclass
-class StringHyphenated(Phrase):
+@dataclass(init=False)
+class NodeManualWord(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class ManualWord(Phrase):
+class NodeFragments(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class FragmentWord(Phrase):
+class NodeFragment(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class FragmentStressed(Phrase):
+class NodeStressedFragment(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class FragmentString(Phrase):
+class NodeJoinedFragments(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class FragmentJoin(Phrase):
+class NodeUncountedFragment(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class FragmentRest(Phrase):
+class NodeTiedWords(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class WordsTied(Phrase):
+class NodeUntiedWords(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class WordsUntied(Phrase):
+class NodeTiedSubwords(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class PiecesTied(Phrase):
+class NodeUntiedSubwords(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class PiecesUntied(Phrase):
+class NodeStressedWord(NodePhrase):
     pass
 
 
-
 @dataclass(init=False)
-class StressAll(Phrase):
-    pass
-
-
-
-@dataclass(init=False)
-class StressNone(Phrase):
+class NodeUnstressedWord(NodePhrase):
     pass

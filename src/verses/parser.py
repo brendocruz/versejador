@@ -5,8 +5,6 @@ from src.verses.scanner import VerseScanner
 from src.utils.mixins import ReprMixin
 from src.verses.errors import ParseError
 
-
-
 class VerseParser(ReprMixin):
     scanner: VerseScanner
     lookaheads: tuple[Optional[Token], Optional[Token]]
@@ -14,6 +12,7 @@ class VerseParser(ReprMixin):
     def __init__(self, scanner: VerseScanner):
         self.scanner = scanner
         self.lookaheads = (None, None)
+
 
     def at_eof(self) -> bool:
         if not self.scanner.at_eof():
@@ -35,7 +34,6 @@ class VerseParser(ReprMixin):
             lookahead2 = self.scanner.pop_token()
         self.lookaheads = (lookahead1, lookahead2)
         return self.lookaheads
-        
 
 
     def pop_token(self) -> Token:
@@ -52,17 +50,17 @@ class VerseParser(ReprMixin):
         return result
 
 
-    def parse_fragment_string(self) -> FragmentString:
-        string = self.parse_string()
-        fragment = FragmentString(string)
+    def parse_fragment(self) -> NodeFragment:
+        string = self.parse_word()
+        fragment = NodeFragment(string)
         return fragment
 
 
-    def parse_fragment_join(self) -> FragmentJoin:
-        fragments: list[String] = []
+    def parse_joined_fragments(self) -> NodeJoinedFragments:
+        fragments: list[NodeWord] = []
         while True:
             token  = self.pop_or_error(TokenKind.STRING)
-            string = String(token.value)
+            string = NodeWord(token.value)
             fragments.append(string)
 
             lookahead, _ = self.peek_token()
@@ -70,52 +68,47 @@ class VerseParser(ReprMixin):
                 self.pop_token()
                 continue
             break
-        return FragmentJoin(*fragments)
+        return NodeJoinedFragments(*fragments)
 
 
-
-    def parse_fragment_join_or_fragment_string(self) -> FragmentJoin | FragmentString:
+    def parse_fragment_or_joined_fragments(self) -> NodeJoinedFragments | NodeFragment:
         lookaheads = self.peek_token()
         if lookaheads[1].kind == TokenKind.UNDERSCORE:
-            return self.parse_fragment_join()
-        return self.parse_fragment_string()
+            return self.parse_joined_fragments()
+        return self.parse_fragment()
 
 
-
-    def parse_fragment_stressed(self) -> FragmentStressed:
+    def parse_stressed_fragment(self) -> NodeStressedFragment:
         self.pop_or_error(TokenKind.PLUS)
-        fragment = self.parse_fragment_join_or_fragment_string()
-        stressed = FragmentStressed(fragment)
+        fragment = self.parse_fragment_or_joined_fragments()
+        stressed = NodeStressedFragment(fragment)
         return stressed
 
 
-    def parse_fragment_rest(self) -> FragmentRest:
+    def parse_uncounted_fragment(self) -> NodeUncountedFragment:
         self.pop_or_error(TokenKind.DOUBLE_DASH)
-        fragment_string = self.parse_string()
-        fragment_rest = FragmentRest(fragment_string)
+        fragment_string = self.parse_word()
+        fragment_rest = NodeUncountedFragment(fragment_string)
         return fragment_rest
 
 
-
-
-    def parse_fragment(self) -> FragmentString | FragmentJoin | FragmentStressed | FragmentRest:
+    def parse_fragment_nodes(self) -> NodeFragment | NodeJoinedFragments | NodeStressedFragment | NodeUncountedFragment:
         lookaheads = self.peek_token()
         if lookaheads[0].kind == TokenKind.PLUS:
-            return self.parse_fragment_stressed()
+            return self.parse_stressed_fragment()
         if lookaheads[0].kind == TokenKind.STRING:
-            return self.parse_fragment_join_or_fragment_string()
+            return self.parse_fragment_or_joined_fragments()
         if lookaheads[0].kind == TokenKind.DOUBLE_DASH:
-            return self.parse_fragment_rest()
-        message = 'Could not parse <auto-built-word>'
+            return self.parse_uncounted_fragment()
+        message = 'Could not parse <auto-word>'
         raise ParseError(self.scanner.index, message)
 
 
-
-    def parse_fragment_word(self) -> Phrase:
+    def parse_fragments(self) -> NodeFragments:
         self.pop_or_error(TokenKind.PIPE)
         strings = []
         while True:
-            string_token = self.parse_fragment()
+            string_token = self.parse_fragment_nodes()
             strings.append(string_token)
             self.pop_or_error(TokenKind.PIPE)
             first, second = self.peek_token()
@@ -130,116 +123,112 @@ class VerseParser(ReprMixin):
             if first.kind == TokenKind.DOUBLE_DASH:
                 continue
             break
-        return FragmentWord(*strings)
+        return NodeFragments(*strings)
 
 
-
-    def parse_string(self) -> String:
+    def parse_word(self) -> NodeWord:
         token  = self.pop_or_error(TokenKind.STRING)
-        return String(token.value)
+        return NodeWord(token.value)
 
 
-
-    def parse_auto_word(self) -> Phrase:
-        left_token = self.parse_string()
-        left_side  = String(left_token.value)
+    def parse_auto_word(self) -> NodeWord | NodeTiedSubwords | NodeUntiedSubwords:
+        left_token = self.parse_word()
+        left_side  = NodeWord(left_token.value)
         while True:
             lookahead, _ = self.peek_token()
             if lookahead.kind == TokenKind.CIRCUMFLEX:
                 self.pop_token()
-                right_token  = self.parse_string()
-                right_side = String(right_token.value)
-                left_side = PiecesTied(left_side, right_side)
+                right_token  = self.parse_word()
+                right_side = NodeWord(right_token.value)
+                left_side = NodeTiedSubwords(left_side, right_side)
                 continue
             if lookahead.kind == TokenKind.TILDE:
                 self.pop_token()
-                right_token  = self.parse_string()
-                right_side = String(right_token.value)
-                left_side = PiecesUntied(left_side, right_side)
+                right_token  = self.parse_word()
+                right_side = NodeWord(right_token.value)
+                left_side = NodeUntiedSubwords(left_side, right_side)
                 continue
             break
         return left_side
 
 
-    def parse_manual_word(self) -> Phrase:
+    def parse_manual_word(self) -> NodeManualWord:
         self.pop_or_error(TokenKind.OPEN_BRACKET)
         left_token  = self.pop_or_error(TokenKind.STRING)
-        left_side = String(left_token.value)
+        left_side = NodeWord(left_token.value)
         strings = [left_side]
 
         while True:
             token = self.pop_token()
             if token.kind == TokenKind.PIPE:
                 right_token = self.pop_or_error(TokenKind.STRING)
-                right_side  = String(right_token.value)
+                right_side  = NodeWord(right_token.value)
                 strings.append(right_side)
                 continue
             if token.kind == TokenKind.CLOSE_BRACKET:
                 break
-            message = 'Could not parse <auto-built-word>'
+            message = 'Could not parse <auto-word>'
             raise ParseError(self.scanner.index, message)
-        return ManualWord(*strings)
+        return NodeManualWord(*strings)
 
-    
 
-    def parse_stress_word(self) -> Phrase:
+    def parse_stressed_word_or_unstressed_word(self) -> NodeStressedWord | NodeUnstressedWord:
         lookahead, _ = self.peek_token()
         if lookahead.kind == TokenKind.GREATER_THAN:
             self.pop_token()
             token = self.pop_or_error(TokenKind.STRING)
-            string = String(token.value)
-            return StressAll(string)
+            string = NodeWord(token.value)
+            return NodeStressedWord(string)
         if lookahead.kind == TokenKind.LESS_THAN:
             self.pop_token()
             token = self.pop_or_error(TokenKind.STRING)
-            string = String(token.value)
-            return StressNone(string)
-        message = 'Could not parse <stress-altered-word>'
+            string = NodeWord(token.value)
+            return NodeUnstressedWord(string)
+        message = 'Could not parse <stressed-word>'
         raise ParseError(self.scanner.index, message)
 
 
-
-    def parse_full_word(self):
+    def parse_full_word(self) -> NodePhrase:
         lookahead, _ = self.peek_token()
         if lookahead.kind == TokenKind.STRING:
             return self.parse_auto_word()
         if lookahead.kind == TokenKind.PIPE:
-            return self.parse_fragment_word()
+            return self.parse_fragments()
         if lookahead.kind == TokenKind.OPEN_BRACKET:
             return self.parse_manual_word()
         if lookahead.kind == TokenKind.GREATER_THAN:
-            return self.parse_stress_word()
+            return self.parse_stressed_word_or_unstressed_word()
         if lookahead.kind == TokenKind.LESS_THAN:
-            return self.parse_stress_word()
-        message = 'Could not parse <full-built-word>'
+            return self.parse_stressed_word_or_unstressed_word()
+        message = 'Could not parse <full-word>'
         raise ParseError(self.scanner.index, message)
 
 
-    def parse_phrase(self) -> Phrase:
+    def parse_phrase(self) -> NodePhrase:
         left_phrase = self.parse_full_word()
         while True:
             lookahead, _ = self.peek_token()
             if lookahead.kind == TokenKind.ASTERISK:
                 self.pop_token()
                 right_phrase = self.parse_full_word()
-                left_phrase = WordsTied(left_phrase, right_phrase)
+                left_phrase = NodeTiedWords(left_phrase, right_phrase)
                 continue
             if lookahead.kind == TokenKind.SLASH:
                 self.pop_token()
                 right_phrase = self.parse_full_word()
-                left_phrase = WordsUntied(left_phrase, right_phrase)
+                left_phrase = NodeUntiedWords(left_phrase, right_phrase)
                 continue
             break
         return left_phrase
 
 
-    def parse_verse(self) -> Verse:
+    def parse_verse(self) -> NodeVerse:
         phrases = []
         while not self.at_eof():
             phrase = self.parse_phrase()
             phrases.append(phrase)
-        return Verse(*phrases)
+        return NodeVerse(*phrases)
 
 
-    def parse(self) -> Verse:
+    def parse(self) -> NodeVerse:
         return self.parse_verse()

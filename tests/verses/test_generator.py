@@ -8,7 +8,7 @@ from unittest import TestCase
 
 class TestVerseGenerator(TestCase):
 
-    def test_multiple_string(self):
+    def test_multiple_words(self):
         text      = 'vermelho azul verde'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -21,8 +21,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|ver|+me|lho_a|+zul|+ver|--de|')
 
 
-
-    def test_tied_pieces(self):
+    def test_tied_subwords(self):
         text      = 'sa^úde'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -35,8 +34,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|+sa_ú|--de|')
 
 
-
-    def test_untied_pieces(self):
+    def test_untied_subwords(self):
         text      = 'o~ito'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -49,8 +47,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|+o|--ito|')
 
 
-
-    def test_tied_pieces_merge_error(self):
+    def test_tied_subwords_merge_error(self):
         text      = 'ver^melho'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -63,8 +60,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|ver|+me|--lho|')
 
 
-
-    def test_tied_pieces_twice(self):
+    def test_tied_subwords_twice(self):
         text      = 'po^esi^a'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -77,8 +73,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|po_e|+si_a|')
 
 
-
-    def test_untied_pieces_twice(self):
+    def test_untied_subwords_twice(self):
         text      = 'ca~uso~u'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -91,8 +86,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|ca|u|+so|--u|')
 
 
-
-    def test_tied_pieces_and_untied_pieces(self):
+    def test_tied_subwords_and_untied_subwords(self):
         text      = 'pro^ibi~u tudo'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -105,8 +99,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|pro_i|+bi|u|+tu|--do|')
 
 
-
-    def test_untied_pieces_and_tied_pieces(self):
+    def test_untied_subwords_and_tied_subwords(self):
         text      = 'á~ure^o dia'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -119,8 +112,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|+á|u|re_o|+di|--a|')
 
 
-
-    def test_manual_words(self):
+    def test_manual_word(self):
         text      = '[ a | ma | re | lo ]'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -133,8 +125,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|a|ma|+re|--lo|')
 
 
-
-    def test_all_stressed(self):
+    def test_stressed_word(self):
         text      = '> amarelo'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -147,8 +138,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|+a|+ma|+re|+lo|')
 
 
-
-    def test_all_unstressed(self):
+    def test_unstressed_word(self):
         text      = '< amarelo'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -161,8 +151,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|a|ma|re|lo|')
 
 
-
-    def test_fragment_word_stressed(self):
+    def test_fragments(self):
         text      = '|+a|ma|+re|lo|'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -175,7 +164,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|+a|ma|+re|--lo|')
 
 
-    def test_fragment_word_join(self):
+    def test_joined_fragments(self):
         text      = '|ca|sa_a|zul|'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -188,8 +177,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(output, '|ca|sa_a|zul|')
 
 
-
-    def test_all(self):
+    def test_all_syntax_together(self):
         text      = '|+tris|te|+di_a| <meu gato [cin|za] está |mo|no|si|+lá|--bico|'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -203,8 +191,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(desired, output)
 
 
-
-    def test_merge_syllables_dipthong_hiatus(self):
+    def test_merge_syllables_with_dipthong_hiatus(self):
         text      = 'sei o seu segredo'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -218,7 +205,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(desired, output)
 
 
-    def test_merge_syllables_hiatus_diphthong(self):
+    def test_merge_syllables_with_hiatus_diphthong(self):
         text      = 'estreou o vestido novo'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -232,7 +219,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(desired, output)
 
 
-    def test_merge_syllables_left_multiple_sources(self):
+    def test_merge_syllables_left_with_multiple_sources(self):
         text      = 'mei^o a meio'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -261,7 +248,7 @@ class TestVerseGenerator(TestCase):
 
 
 
-    def test_merge_syllables_prefix_simple(self):
+    def test_merge_syllables_with_simple_coda_prefix(self):
         text      = 'mais um dia'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -276,7 +263,7 @@ class TestVerseGenerator(TestCase):
 
 
 
-    def test_merge_syllables_coda_prefix_complex(self):
+    def test_merge_syllables_with_complex_coda_prefix(self):
         text      = 'tens o amor'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -291,7 +278,7 @@ class TestVerseGenerator(TestCase):
 
 
 
-    def test_parse_coda_prefix_simple(self):
+    def test_parse_simple_coda_prefix(self):
         text      = '|+mai|s_um|+di|--a|'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -306,7 +293,7 @@ class TestVerseGenerator(TestCase):
 
 
 
-    def test_parse_coda_prefix_complex(self):
+    def test_parse_complex_coda_prefix(self):
         text      = '|+ten|s_o_a|+mor|'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -320,8 +307,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(desired, output)
 
 
-
-    def test_words_untied(self):
+    def test_untied_words(self):
         text      = 'amarelo / azul'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -335,7 +321,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(desired, output)
 
 
-    def test_words_tied(self):
+    def test_tied_words(self):
         text      = 'amarelo * azul'
         splitter  = WordSplitter()
         finder    = StressFinder()
@@ -349,7 +335,7 @@ class TestVerseGenerator(TestCase):
         self.assertEqual(desired, output)
 
 
-    def test_words_tied_and_untied(self):
+    def test_tied_words_and_untied_words(self):
         text      = '|la|ran|ja| * e / [a|zul]'
         splitter  = WordSplitter()
         finder    = StressFinder()
