@@ -8,7 +8,7 @@ class TestWordClass(TestCase):
 
     def test_length_when_empty(self):
         word = Word()
-        self.assertEqual(0, len(word))
+        self.assertEqual(0, len(word.text()))
 
 
 
@@ -20,7 +20,7 @@ class TestWordClass(TestCase):
         syllables.extend([syllable_1, syllable_2, syllable_3])
 
         word = Word(syllables)
-        self.assertEqual(6, len(word))
+        self.assertEqual(6, len(word.text()))
 
 
 

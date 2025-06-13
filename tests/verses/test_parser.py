@@ -3,7 +3,10 @@ from src.verses.scanner import VerseScanner
 from src.verses.parser import ParseError, VerseParser
 from src.verses.nodes import *
 
+
+
 class TestParser(TestCase):
+
 
     def test_empty(self):
         input   = ''

@@ -143,7 +143,7 @@ class VerseGenerator:
 
         unpacked_syllables: list[Syllable] = []
         for poetic_syllable in poetic_syllables:
-            unpacked_syllables.extend(poetic_syllable.sources)
+            unpacked_syllables.extend(poetic_syllable._items)
 
         merged_word = Word(unpacked_syllables)
         regular_word = self.splitter.run(merged_word.text())
@@ -156,11 +156,11 @@ class VerseGenerator:
         start, end = regular_word.span_text(stress_index)
         indices    = merged_word.span_syllable(start, end)
         choose     = indices[0]
-        merged_word.syllables[choose].stress = True
+        merged_word[choose].stress = True
 
-        target_syllable = merged_word.syllables[choose]
+        target_syllable = merged_word[choose]
         for poetic_syllable in poetic_syllables:
-            if target_syllable in poetic_syllable.sources:
+            if target_syllable in poetic_syllable:
                 poetic_syllable.stress = True
         return poetic_syllables
 
@@ -175,7 +175,7 @@ class VerseGenerator:
 
         poetic_syllables: list[PoeticSyllable] = []
         for syllable in syllables:
-            poetic_syllable = PoeticSyllable(sources=[syllable])
+            poetic_syllable = PoeticSyllable([syllable])
             poetic_syllables.append(poetic_syllable)
         return poetic_syllables
 
@@ -183,19 +183,19 @@ class VerseGenerator:
     def split_and_stress_string(self, string: NodeWord) -> list[Syllable]:
         word = self.splitter.run(string.value)
         self.finder.run(word)
-        return word.syllables
+        return word._syllables
 
 
     def split_word_into_syllables(self, string: NodeWord) -> list[Syllable]:
         word = self.splitter.run(string.value)
-        return word.syllables
+        return word._syllables
 
 
     def split_word_into_poetic_syllables(self, string: NodeWord) -> list[PoeticSyllable]:
         word = self.splitter.run(string.value)
         poetic_syllables: list[PoeticSyllable] = []
-        for syllable in word.syllables:
-            poetic_syllable = PoeticSyllable(sources=[syllable])
+        for syllable in word._syllables:
+            poetic_syllable = PoeticSyllable([syllable])
             poetic_syllables.append(poetic_syllable)
         return poetic_syllables
 
@@ -203,14 +203,14 @@ class VerseGenerator:
     def stress_word(self, syllables: list[Syllable]) -> list[Syllable]:
         word = Word(syllables)
         self.finder.run(word)
-        return word.syllables
+        return word._syllables
 
 
     def generate_word(self, string: NodeWord) -> list[PoeticSyllable]:
         syllables = self.split_and_stress_string(string)
         poetic_syllables: list[PoeticSyllable] = []
         for syllable in syllables:
-            poetic_syllable = PoeticSyllable(sources=[syllable])
+            poetic_syllable = PoeticSyllable([syllable])
             poetic_syllables.append(poetic_syllable)
         return poetic_syllables
 
@@ -224,7 +224,7 @@ class VerseGenerator:
 
         poetic_syllables: list[PoeticSyllable] = []
         for syllable in syllables:
-            poetic_syllable = PoeticSyllable(sources=[syllable])
+            poetic_syllable = PoeticSyllable([syllable])
             poetic_syllables.append(poetic_syllable)
         return poetic_syllables
 
@@ -236,7 +236,7 @@ class VerseGenerator:
 
         poetic_syllables: list[PoeticSyllable] = []
         for syllable in syllables:
-            poetic_syllable = PoeticSyllable(sources=[syllable])
+            poetic_syllable = PoeticSyllable([syllable])
             poetic_syllables.append(poetic_syllable)
         return poetic_syllables
 
@@ -262,7 +262,7 @@ class VerseGenerator:
 
         poetic_syllables: list[PoeticSyllable] = []
         for syllable in syllables:
-            poetic_syllable = PoeticSyllable(sources=[syllable])
+            poetic_syllable = PoeticSyllable([syllable])
             poetic_syllables.append(poetic_syllable)
         return poetic_syllables
 
@@ -272,7 +272,7 @@ class VerseGenerator:
         for child in fragment.children:
             child = cast(NodeWord, child)
             syllables = self.split_word_into_syllables(child)
-            other = PoeticSyllable(sources=syllables)
+            other = PoeticSyllable(syllables)
             poetic_syllable.extend(other)
         return [poetic_syllable]
 
@@ -421,22 +421,22 @@ class VerseGenerator:
                 index += 1
                 continue
 
-            if len(left_syllable.sources) > 1:
+            if len(left_syllable) > 1:
                 merged_syllables.append(left_syllable)
                 index += 1
                 continue
 
-            # if len(right_syllable.sources) > 1:
+            # if len(right_syllable) > 1:
             #     merged_syllables.append(left_syllable)
             #     index += 1
             #     continue
 
-            if left_syllable.sources[0].has_diphthong():
+            if left_syllable[0].has_diphthong():
                 merged_syllables.append(left_syllable)
                 index += 1
                 continue
 
-            if right_syllable.sources[0].has_diphthong():
+            if right_syllable[0].has_diphthong():
                 merged_syllables.append(left_syllable)
                 index += 1
                 continue
